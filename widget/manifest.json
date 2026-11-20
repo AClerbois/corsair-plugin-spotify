@@ -1,0 +1,36 @@
+{
+  "author": "Adrien",
+  "id": "com.edgewidgets.spotifyplayer",
+  "name": "Spotify Player",
+  "description": "Now playing, artwork and touch controls for Spotify",
+  "version": "1.2.0",
+  "preview_icon": "resources/icon.svg",
+  "min_framework_version": "1.0.1",
+  "min_app_version": "5.52.0",
+  "os": [
+    {
+      "platform": "windows"
+    }
+  ],
+  "supported_devices": [
+    {
+      "type": "dashboard_lcd"
+    }
+  ],
+  "interactive": true,
+  "required_plugins": ["widgetbuilder.mediadataprovider:Media:1.1"],
+  "permissions": [
+    {
+      "type": "url",
+      "domain": "spotify.com"
+    },
+    {
+      "type": "url",
+      "domain": "scdn.co"
+    },
+    {
+      "type": "url",
+      "domain": "spotifycdn.com"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>tr('Spotify Player')</title>
+		<link rel="icon" type="image/svg+xml" href="resources/icon.svg">
+
+		<meta
+			name="x-icue-property"
+			content="accentColor"
+			data-label="tr('Accent color')"
+			data-type="color"
+			data-default="'#1ED760'"
+		>
+
+		<meta
+			name="x-icue-property"
+			content="artworkBackground"
+			data-label="tr('Artwork background')"
+			data-type="switch"
+			data-default="true"
+		>
+
+		<meta
+			name="x-icue-property"
+			content="spotifyClientId"
+			data-label="tr('Client ID')"
+			data-type="textfield"
+			data-default="''"
+		>
+
+		<meta
+			name="x-icue-property"
+			content="spotifyRefreshToken"
+			data-label="tr('Refresh token')"
+			data-type="textfield"
+			data-default="''"
+		>
+
+		<meta
+			name="x-icue-property"
+			content="keyboardLayout"
+			data-label="tr('Keyboard layout')"
+			data-type="combobox"
+			data-values="[{'key':'azerty','value':'AZERTY'},{'key':'qwerty','value':'QWERTY'}]"
+			data-default="'azerty'"
+		>
+
+		<script type="application/json" id="x-icue-groups">
+		[
+			{
+				"title": "tr('Appearance')",
+				"properties": ["accentColor", "artworkBackground", "keyboardLayout"]
+			},
+			{
+				"title": "tr('Spotify account (optional)')",
+				"properties": ["spotifyClientId", "spotifyRefreshToken"],
+				"info": "tr('Without these fields the widget shows the track playing on Windows with play, next and previous. Fill them in (see README) to add progress, seek, shuffle, repeat, like and volume.')"
+			}
+		]
+		</script>
+
+		<link rel="stylesheet" href="style.css">
+	</head>
+
+	<body class="idle media-only">
+		<div id="bg"></div>
+		<div id="shade"></div>
+
+		<main id="player">
+			<div id="art"><img id="art-img" alt=""></div>
+
+			<section id="content">
+				<div id="meta">
+					<div id="title"></div>
+					<div id="artist"></div>
+					<div id="hint"></div>
+				</div>
+
+				<div id="progress">
+					<span id="elapsed" class="time">0:00</span>
+					<div id="seek" class="slider"><div class="track"><div class="fill"></div></div><div class="thumb"></div></div>
+					<span id="duration" class="time">0:00</span>
+				</div>
+
+				<div id="controls">
+					<button id="btn-shuffle" class="btn small sp" aria-label="Shuffle">
+						<svg viewBox="0 0 24 24"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+					</button>
+					<button id="btn-prev" class="btn" aria-label="Previous">
+						<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+					</button>
+					<button id="btn-play" class="btn primary" aria-label="Play or pause">
+						<svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+						<svg class="i-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+					</button>
+					<button id="btn-next" class="btn" aria-label="Next">
+						<svg viewBox="0 0 24 24"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+					</button>
+					<button id="btn-repeat" class="btn small sp" aria-label="Repeat">
+						<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+						<span class="badge">1</span>
+					</button>
+					<button id="btn-like" class="btn small sp" aria-label="Like">
+						<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+					</button>
+					<button id="btn-browse" class="btn small" aria-label="Browse">
+						<svg viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
+					</button>
+
+					<div id="volume" class="sp">
+						<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+						<div id="vol" class="slider"><div class="track"><div class="fill"></div></div><div class="thumb"></div></div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<div id="panel" hidden>
+			<header>
+				<nav id="tabs">
+					<button class="tab" data-tab="queue"></button>
+					<button class="tab" data-tab="playlists"></button>
+					<button class="tab" data-tab="search"></button>
+					<button class="tab" data-tab="devices"></button>
+				</nav>
+				<div id="search-field"></div>
+				<button id="panel-radio" class="btn small" aria-label="Radio">
+					<svg class="line" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><path d="M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>
+				</button>
+				<button id="panel-close" class="btn small" aria-label="Close">
+					<svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+				</button>
+			</header>
+			<div id="panel-row"></div>
+			<div id="kb"></div>
+		</div>
+
+		<div id="toast" hidden></div>
+
+		<script src="app.js"></script>
+		<script src="browse.js"></script>
+	</body>
+</html>
